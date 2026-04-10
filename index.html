@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Crítico de Sentencias con IA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        serif: ['Playfair Display', 'Georgia', 'serif'],
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        cream: {
+                            50: '#FFFDF9',
+                            100: '#FDF8F0',
+                            200: '#F7F2E8',
+                            300: '#EDE5D8',
+                        },
+                        wine: {
+                            50: '#FDF2F4',
+                            100: '#F5D0D8',
+                            200: '#E8A1B0',
+                            300: '#C96B7E',
+                            400: '#A94360',
+                            500: '#7A2D47',
+                            600: '#602537',
+                            700: '#4A1D2B',
+                            800: '#35151F',
+                            900: '#200D14',
+                        },
+                        warm: {
+                            50: '#FAF8F5',
+                            100: '#F3EDE5',
+                            200: '#E8DFD2',
+                            300: '#D4C7B5',
+                            400: '#B5A48D',
+                            500: '#8C7B66',
+                            600: '#6B5D4D',
+                            700: '#4A3F34',
+                            800: '#2E2820',
+                            900: '#1A1714',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* === ANIMATIONS === */
+        .observe-animate { opacity: 0; transform: translateY(30px); transition: all 0.8s cubic-bezier(0.22, 1, 0.36, 1); }
+        .observe-animate.observed { opacity: 1; transform: translateY(0); }
+        .observe-animate[data-animation="slide-left"] { transform: translateX(-40px); }
+        .observe-animate[data-animation="slide-left"].observed { transform: translateX(0); }
+        .observe-animate[data-animation="slide-right"] { transform: translateX(40px); }
+        .observe-animate[data-animation="slide-right"].observed { transform: translateX(0); }
+        .observe-animate[data-animation="scale"] { transform: scale(0.95); }
+        .observe-animate[data-animation="scale"].observed { transform: scale(1); }
+        .observe-animate[data-animation="fade"] { transform: none; }
+        .observe-animate[data-animation="fade"].observed { transform: none; }
+
+        /* Hero parallax image */
+        .hero-image {
+            transition: transform 0.1s linear;
+        }
+
+        /* Smooth underline animation for nav */
+        .nav-link-underline {
+            position: relative;
+        }
+        .nav-link-underline::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #602537;
+            transition: width 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .nav-link-underline:hover::after,
+        .nav-link-underline.active::after {
+            width: 100%;
+        }
+
+        /* Pill button hover */
+        .btn-pill {
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .btn-pill:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(96, 37, 55, 0.25);
+        }
+
+        /* Card elevation */
+        .card-lift {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .card-lift:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 48px -12px rgba(0,0,0,0.12);
+        }
+
+        /* Prompt block */
+        .prompt-block {
+            position: relative;
+            overflow: hidden;
+        }
+        .prompt-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #602537, #A94360);
+        }
+
+        /* Copy button */
+        .copy-btn { transition: all 0.3s ease; }
+        .copy-btn:hover { background: rgba(96,37,55,0.1); }
+        .copy-btn.copied { background: rgba(16,185,129,0.1) !important; color: #059669 !important; }
+
+        /* Section image overlay */
+        .img-overlay {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+        }
+        .img-overlay img {
+            transition: transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .img-overlay:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Accordion smooth open */
+        details[open] summary ~ * {
+            animation: accordionOpen 0.3s ease-out;
+        }
+        @keyframes accordionOpen {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Progress bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #602537, #A94360, #602537);
+            z-index: 100;
+            transition: width 0.1s linear;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #FDF8F0; }
+        ::-webkit-scrollbar-thumb { background: #D4C7B5; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #B5A48D; }
+
+        /* Timeline connector */
+        .timeline-dot {
+            position: relative;
+            z-index: 2;
+        }
+        .timeline-dot::before {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: calc(100% + 2rem);
+            background: linear-gradient(180deg, #E8A1B0, transparent);
+            z-index: -1;
+        }
+
+        /* D-card hover */
+        .d-card-hover {
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            border-bottom: 3px solid transparent;
+        }
+        .d-card-hover:hover {
+            border-bottom-color: #602537;
+            transform: translateY(-4px);
+            box-shadow: 0 16px 40px -8px rgba(0,0,0,0.1);
+        }
+
+        /* Floating badge */
+        @keyframes floatBadge {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        .float-badge { animation: floatBadge 5s ease-in-out infinite; }
+
+        /* Image with warm filter */
+        .warm-image {
+            filter: saturate(0.9) brightness(1.02);
+        }
+
+        /* Grain texture overlay */
+        .grain::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body class="bg-cream-100 text-warm-800 font-sans antialiased">
+
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+
+    <!-- ========== NAVIGATION ========== -->
+    <nav class="fixed top-0 w-full z-50 bg-cream-50/90 backdrop-blur-xl border-b border-warm-200/60" id="mainNav">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <div class="flex items-center justify-between h-[72px]">
+                <a href="#" class="flex items-center gap-3 group">
+                    <div class="w-10 h-10 rounded-full bg-wine-600 flex items-center justify-center transition-transform duration-300 group-hover:scale-110">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                    </div>
+                    <div class="hidden sm:block">
+                        <span class="font-serif text-sm lg:text-base text-warm-900 font-semibold leading-tight">Inteligencia artificial y análisis</span>
+                        <span class="font-serif text-sm lg:text-base text-wine-600 font-semibold leading-tight"> avanzado de jurisprudencia</span>
+                    </div>
+                </a>
+
+                <div class="hidden md:flex items-center gap-8">
+                    <a href="#contexto" class="nav-link-underline text-sm font-medium text-warm-700 hover:text-wine-600 tracking-wide uppercase" style="letter-spacing: 0.05em;">Contexto</a>
+                    <a href="#flujo" class="nav-link-underline text-sm font-medium text-warm-700 hover:text-wine-600 tracking-wide uppercase" style="letter-spacing: 0.05em;">Flujo</a>
+                    <a href="#demo" class="nav-link-underline text-sm font-medium text-warm-700 hover:text-wine-600 tracking-wide uppercase" style="letter-spacing: 0.05em;">Prompts</a>
+                    <a href="#cierre" class="nav-link-underline text-sm font-medium text-warm-700 hover:text-wine-600 tracking-wide uppercase" style="letter-spacing: 0.05em;">Cierre</a>
+                </div>
+
+                <button id="mobileMenuBtn" class="md:hidden w-10 h-10 flex items-center justify-center rounded-full hover:bg-warm-100 transition-colors">
+                    <svg class="w-5 h-5 text-warm-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                </button>
+            </div>
+        </div>
+        <div id="mobileMenu" class="hidden md:hidden bg-cream-50 border-t border-warm-200/60">
+            <div class="px-5 py-4 space-y-1">
+                <a href="#contexto" class="mobile-nav block px-4 py-3 text-sm font-medium text-warm-700 hover:text-wine-600 hover:bg-warm-50 rounded-xl uppercase tracking-wider">Contexto</a>
+                <a href="#flujo" class="mobile-nav block px-4 py-3 text-sm font-medium text-warm-700 hover:text-wine-600 hover:bg-warm-50 rounded-xl uppercase tracking-wider">Flujo</a>
+                <a href="#demo" class="mobile-nav block px-4 py-3 text-sm font-medium text-warm-700 hover:text-wine-600 hover:bg-warm-50 rounded-xl uppercase tracking-wider">Prompts</a>
+                <a href="#cierre" class="mobile-nav block px-4 py-3 text-sm font-medium text-warm-700 hover:text-wine-600 hover:bg-warm-50 rounded-xl uppercase tracking-wider">Cierre</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO ========== -->
+    <header class="relative min-h-screen flex items-end overflow-hidden grain">
+        <!-- Full background image -->
+        <div class="absolute inset-0">
+            <img src="https://images.unsplash.com/photo-1589829545856-d10d557cf95f?w=1920&q=80&auto=format&fit=crop"
+                 alt="Escritorio legal con libros y balanza de justicia"
+                 class="hero-image w-full h-full object-cover warm-image">
+            <!-- Gradient overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-warm-900/95 via-warm-900/50 to-warm-900/20"></div>
+            <div class="absolute inset-0 bg-gradient-to-r from-warm-900/40 to-transparent"></div>
+        </div>
+
+        <div class="relative z-10 w-full max-w-7xl mx-auto px-5 sm:px-8 lg:px-12 pb-16 sm:pb-24 pt-32">
+            <div class="max-w-3xl">
+                <!-- Badge -->
+                <div class="observe-animate inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-cream-100 text-sm font-medium mb-8" data-animation="fade">
+                    <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+                    Clase Interactiva
+                </div>
+
+                <h1 class="observe-animate font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-white font-medium leading-[1.1] mb-6" data-animation="fade" style="transition-delay:0.15s">
+                    Análisis crítico de<br>
+                    sentencias con <em class="text-wine-100 italic">IA</em>
+                </h1>
+
+                <p class="observe-animate text-lg sm:text-xl text-cream-100/90 max-w-xl leading-relaxed mb-10" data-animation="fade" style="transition-delay:0.3s">
+                    Para identificar agravios y fundar recursos de apelación
+                </p>
+
+                <div class="observe-animate flex flex-wrap items-center gap-4" data-animation="fade" style="transition-delay:0.45s">
+                    <a href="#contexto" class="btn-pill inline-flex items-center gap-2 px-8 py-4 bg-cream-50 text-wine-700 font-semibold text-sm uppercase tracking-wider rounded-full">
+                        Comenzar la clase
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-10">
+            <div class="w-6 h-10 rounded-full border-2 border-white/30 flex justify-center pt-2">
+                <div class="w-1 h-2 bg-white/60 rounded-full animate-bounce"></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== SECTION 1: CONTEXTO ========== -->
+    <section id="contexto" class="relative py-20 sm:py-28 bg-cream-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <!-- Section label -->
+            <div class="observe-animate flex items-center gap-3 mb-4">
+                <span class="inline-block w-12 h-[2px] bg-wine-600"></span>
+                <span class="text-wine-600 text-xs font-semibold uppercase tracking-[0.15em]">Sección 01</span>
+            </div>
+            <div class="observe-animate mb-6" style="transition-delay:0.1s">
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl text-warm-900 font-medium leading-tight">
+                    El abogado frente a<br class="hidden sm:block"> una sentencia adversa
+                </h2>
+            </div>
+            <div class="mb-14"></div>
+
+            <!-- Two column layout: text + image -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center mb-16">
+                <div>
+                    <p class="observe-animate text-lg text-warm-800 leading-relaxed mb-10">
+                        Cuando una sentencia resulta adversa, el tiempo corre en nuestra contra y tenemos que resolver los siguientes problemas:
+                    </p>
+
+                    <!-- Problem list -->
+                    <div class="space-y-5">
+                        <div class="observe-animate flex items-start gap-4" style="transition-delay:0.1s">
+                            <div class="w-10 h-10 rounded-2xl bg-wine-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-wine-600 font-serif font-bold text-lg">1</span>
+                            </div>
+                            <div>
+                                <h4 class="text-warm-900 font-semibold mb-1">Leer la sentencia</h4>
+                                <p class="text-warm-700 text-sm leading-relaxed">Que puede tener decenas de páginas, entendiendo lo que dice, y también lo que omite o tergiversa.</p>
+                            </div>
+                        </div>
+
+                        <div class="observe-animate flex items-start gap-4" style="transition-delay:0.15s">
+                            <div class="w-10 h-10 rounded-2xl bg-wine-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-wine-600 font-serif font-bold text-lg">2</span>
+                            </div>
+                            <div>
+                                <h4 class="text-warm-900 font-semibold mb-1">Identificar errores</h4>
+                                <p class="text-warm-700 text-sm leading-relaxed">Susceptibles de agravio: fácticos, normativos, de fundamentación, procesales.</p>
+                            </div>
+                        </div>
+
+                        <div class="observe-animate flex items-start gap-4" style="transition-delay:0.2s">
+                            <div class="w-10 h-10 rounded-2xl bg-wine-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-wine-600 font-serif font-bold text-lg">3</span>
+                            </div>
+                            <div>
+                                <h4 class="text-warm-900 font-semibold mb-1">Jerarquizar agravios</h4>
+                                <p class="text-warm-700 text-sm leading-relaxed">Cuáles sostienen el recurso, cuáles son accesorios, cuáles no valen la pena.</p>
+                            </div>
+                        </div>
+
+                        <div class="observe-animate flex items-start gap-4" style="transition-delay:0.25s">
+                            <div class="w-10 h-10 rounded-2xl bg-wine-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                <span class="text-wine-600 font-serif font-bold text-lg">4</span>
+                            </div>
+                            <div>
+                                <h4 class="text-warm-900 font-semibold mb-1">Redactar fundamentos</h4>
+                                <p class="text-warm-700 text-sm leading-relaxed">Que sean sólidos y persuasivos para la instancia revisora.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Image column -->
+                <div class="observe-animate" data-animation="slide-right" style="transition-delay:0.2s">
+                    <div class="img-overlay rounded-2xl shadow-xl">
+                        <img src="https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=800&q=80&auto=format&fit=crop"
+                             alt="Abogado trabajando con documentos legales"
+                             class="w-full h-[420px] object-cover rounded-2xl warm-image">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Key insight -->
+            <div class="observe-animate max-w-3xl" data-animation="scale">
+                <div class="relative bg-wine-600 rounded-3xl p-8 sm:p-10 text-white overflow-hidden">
+                    <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+                    <div class="absolute bottom-0 left-0 w-32 h-32 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+                    <div class="relative z-10">
+                        <p class="text-xl sm:text-2xl font-serif leading-relaxed">
+                            La IA <strong class="font-bold">no reemplaza</strong> ninguno de esos pasos. Pero puede <em class="italic text-wine-100">acelerar y mejorar</em> el proceso.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question -->
+            <div class="observe-animate mt-10 max-w-3xl">
+                <div class="flex items-start gap-4 bg-amber-50/80 border border-amber-200/60 rounded-2xl p-6">
+                    <div class="w-10 h-10 rounded-2xl bg-amber-100 flex items-center justify-center flex-shrink-0">
+                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <p class="text-warm-800 italic leading-relaxed">
+                        <strong class="not-italic text-warm-900">Pregunta para reflexionar:</strong> ¿Qué es lo primero que tenemos que hacer antes de analizar una sentencia con IA?
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SECTION 2: FLUJO DE TRABAJO ========== -->
+    <section id="flujo" class="relative py-20 sm:py-28 bg-warm-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <!-- Section label -->
+            <div class="observe-animate flex items-center gap-3 mb-4">
+                <span class="inline-block w-12 h-[2px] bg-wine-600"></span>
+                <span class="text-wine-600 text-xs font-semibold uppercase tracking-[0.15em]">Sección 02</span>
+            </div>
+            <div class="observe-animate mb-6" style="transition-delay:0.1s">
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl text-warm-900 font-medium leading-tight">
+                    Del análisis al recurso
+                </h2>
+            </div>
+            <div class="mb-16"></div>
+
+            <!-- Workflow Cards -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+                <!-- Card 1 -->
+                <div class="observe-animate card-lift bg-white rounded-2xl p-7 shadow-sm border border-warm-100" style="transition-delay:0.1s">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-serif font-bold">1</span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full">Automatización</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-3">Resumen estructurado</h3>
+                    <p class="text-warm-700 text-sm leading-relaxed">La IA mapea la sentencia: partes, pretensiones, fundamentos, decisión. Un mapa para no leer varias veces.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="observe-animate card-lift bg-white rounded-2xl p-7 shadow-sm border border-warm-100" style="transition-delay:0.2s">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-9 h-9 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 font-serif font-bold">2</span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-blue-500 bg-blue-50 px-2.5 py-1 rounded-full">Automatización</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-3">Búsqueda de fuentes</h3>
+                    <p class="text-warm-700 text-sm leading-relaxed">Buscar fuentes para fundar el recurso y brindar contexto para alimentar a la IA en la tarea de elaborar agravios.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="observe-animate card-lift bg-white rounded-2xl p-7 shadow-sm border border-warm-100" style="transition-delay:0.3s">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-serif font-bold">3</span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Augmentación</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-3">Identificación de agravios</h3>
+                    <p class="text-warm-700 text-sm leading-relaxed">IA y abogado trabajan juntos para detectar errores. El abogado guía y descarta.</p>
+                </div>
+
+                <!-- Card 4 -->
+                <div class="observe-animate card-lift bg-white rounded-2xl p-7 shadow-sm border border-warm-100" style="transition-delay:0.4s">
+                    <div class="flex items-center gap-3 mb-5">
+                        <span class="w-9 h-9 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 font-serif font-bold">4</span>
+                        <span class="text-[10px] font-bold uppercase tracking-[0.12em] text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full">Augmentación</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-3">Borrador de fundamentos</h3>
+                    <p class="text-warm-700 text-sm leading-relaxed">La IA genera un primer borrador por cada agravio. El abogado edita, profundiza y firma.</p>
+                </div>
+            </div>
+
+            <!-- Strategy box -->
+            <div class="observe-animate max-w-2xl mx-auto text-center mb-20" data-animation="scale">
+                <p class="text-warm-800 text-lg leading-relaxed bg-white rounded-2xl p-8 shadow-sm border border-warm-100">
+                    El <strong class="text-warm-900">criterio estratégico</strong> &mdash; qué recurrir, con qué recurso, ante qué tribunal &mdash; es <strong class="text-wine-600">siempre del abogado</strong>. La IA opera dentro de cada decisión.
+                </p>
+            </div>
+
+            <!-- TIPOS DE AGRAVIOS -->
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+                <!-- Left: image -->
+                <div class="observe-animate" data-animation="slide-left">
+                    <div class="img-overlay rounded-2xl shadow-lg sticky top-28">
+                        <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?w=800&q=80&auto=format&fit=crop"
+                             alt="Biblioteca jurídica con tomos de derecho"
+                             class="w-full h-[500px] object-cover rounded-2xl warm-image">
+                        <div class="absolute inset-0 bg-gradient-to-t from-warm-900/30 to-transparent rounded-2xl"></div>
+                        <div class="absolute bottom-6 left-6 right-6">
+                            <p class="text-white/90 text-sm font-medium">5 tipos de errores detectables con asistencia de IA</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: accordion -->
+                <div>
+                    <h3 class="observe-animate font-serif text-2xl sm:text-3xl text-warm-900 font-medium mb-8">
+                        Los cinco tipos de errores que la IA puede ayudar a detectar
+                    </h3>
+
+                    <div class="space-y-3">
+                        <!-- Agravio A -->
+                        <div class="observe-animate" style="transition-delay:0.05s">
+                            <details class="group bg-white rounded-2xl border border-warm-100 shadow-sm overflow-hidden" open>
+                                <summary class="flex items-center gap-4 p-5 cursor-pointer hover:bg-warm-50/50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-red-50 flex items-center justify-center text-red-500 font-serif font-bold flex-shrink-0">A</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-warm-900 font-semibold">Error fáctico</h4>
+                                    </div>
+                                    <svg class="w-5 h-5 text-warm-500 group-open:rotate-180 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </summary>
+                                <div class="px-5 pb-5">
+                                    <p class="text-warm-700 text-sm mb-3">La sentencia tuerce los hechos probados o valora la prueba de modo arbitrario.</p>
+                                    <div class="bg-warm-50 rounded-xl p-4">
+                                        <p class="text-warm-700 text-sm"><strong class="text-warm-900">Señal:</strong> "El juez afirma X pero la prueba dice Y." Buscar contradicciones entre los considerandos y el expediente.</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Agravio B -->
+                        <div class="observe-animate" style="transition-delay:0.1s">
+                            <details class="group bg-white rounded-2xl border border-warm-100 shadow-sm overflow-hidden">
+                                <summary class="flex items-center gap-4 p-5 cursor-pointer hover:bg-warm-50/50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center text-orange-500 font-serif font-bold flex-shrink-0">B</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-warm-900 font-semibold">Error normativo</h4>
+                                    </div>
+                                    <svg class="w-5 h-5 text-warm-500 group-open:rotate-180 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </summary>
+                                <div class="px-5 pb-5">
+                                    <p class="text-warm-700 text-sm mb-3">Se aplica mal la norma, se la ignora, o se la interpreta en contra de la jurisprudencia consolidada.</p>
+                                    <div class="bg-warm-50 rounded-xl p-4">
+                                        <p class="text-warm-700 text-sm"><strong class="text-warm-900">Señal:</strong> "La norma dice A pero el juez aplica B." Verificar si hay jurisprudencia en sentido contrario.</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Agravio C -->
+                        <div class="observe-animate" style="transition-delay:0.15s">
+                            <details class="group bg-white rounded-2xl border border-warm-100 shadow-sm overflow-hidden">
+                                <summary class="flex items-center gap-4 p-5 cursor-pointer hover:bg-warm-50/50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center text-amber-500 font-serif font-bold flex-shrink-0">C</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-warm-900 font-semibold">Falta o defecto de fundamentación</h4>
+                                    </div>
+                                    <svg class="w-5 h-5 text-warm-500 group-open:rotate-180 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </summary>
+                                <div class="px-5 pb-5">
+                                    <p class="text-warm-700 text-sm mb-3">La sentencia no explica el razonamiento, usa fórmulas vacías o contradice sus propios argumentos.</p>
+                                    <div class="bg-warm-50 rounded-xl p-4">
+                                        <p class="text-warm-700 text-sm"><strong class="text-warm-900">Señal:</strong> "El juez concluye X sin explicar por qué." Detectar afirmaciones dogmáticas sin sustento.</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Agravio D -->
+                        <div class="observe-animate" style="transition-delay:0.2s">
+                            <details class="group bg-white rounded-2xl border border-warm-100 shadow-sm overflow-hidden">
+                                <summary class="flex items-center gap-4 p-5 cursor-pointer hover:bg-warm-50/50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-cyan-50 flex items-center justify-center text-cyan-600 font-serif font-bold flex-shrink-0">D</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-warm-900 font-semibold">Omisión de pronunciamiento</h4>
+                                    </div>
+                                    <svg class="w-5 h-5 text-warm-500 group-open:rotate-180 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </summary>
+                                <div class="px-5 pb-5">
+                                    <p class="text-warm-700 text-sm mb-3">El juez no se expidió sobre una pretensión o defensa que estaba planteada.</p>
+                                    <div class="bg-warm-50 rounded-xl p-4">
+                                        <p class="text-warm-700 text-sm"><strong class="text-warm-900">Señal:</strong> Comparar las pretensiones del escrito inicial con los puntos resueltos en la sentencia.</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- Agravio E -->
+                        <div class="observe-animate" style="transition-delay:0.25s">
+                            <details class="group bg-white rounded-2xl border border-warm-100 shadow-sm overflow-hidden">
+                                <summary class="flex items-center gap-4 p-5 cursor-pointer hover:bg-warm-50/50 transition-colors">
+                                    <span class="w-10 h-10 rounded-xl bg-pink-50 flex items-center justify-center text-pink-500 font-serif font-bold flex-shrink-0">E</span>
+                                    <div class="flex-1 min-w-0">
+                                        <h4 class="text-warm-900 font-semibold">Violación del debido proceso</h4>
+                                    </div>
+                                    <svg class="w-5 h-5 text-warm-500 group-open:rotate-180 transition-transform duration-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+                                </summary>
+                                <div class="px-5 pb-5">
+                                    <p class="text-warm-700 text-sm mb-3">Se vulneró el derecho de defensa, la bilateralidad o la igualdad procesal.</p>
+                                    <div class="bg-warm-50 rounded-xl p-4">
+                                        <p class="text-warm-700 text-sm"><strong class="text-warm-900">Señal:</strong> Revisar si hubo producción de prueba sin control de partes, sorpresa en la resolución, etc.</p>
+                                    </div>
+                                </div>
+                            </details>
+                        </div>
+                    </div>
+
+                    <!-- Warning -->
+                    <div class="observe-animate mt-6">
+                        <div class="flex items-start gap-3 bg-amber-50 border border-amber-200/60 rounded-2xl p-5">
+                            <svg class="w-5 h-5 text-amber-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <p class="text-warm-700 text-sm leading-relaxed">
+                                <strong class="text-warm-900">Advertencia:</strong> Para verificar los señalamientos de la IA, es imprescindible conocer el expediente o legajo, y comprender el derecho procesal y de fondo aplicable.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SECTION 3: DEMO / PROMPTS ========== -->
+    <section id="demo" class="relative py-20 sm:py-28 bg-cream-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <!-- Section label -->
+            <div class="observe-animate flex items-center gap-3 mb-4">
+                <span class="inline-block w-12 h-[2px] bg-wine-600"></span>
+                <span class="text-wine-600 text-xs font-semibold uppercase tracking-[0.15em]">Sección 03</span>
+            </div>
+            <div class="observe-animate grid lg:grid-cols-2 gap-8 items-end mb-16" style="transition-delay:0.1s">
+                <div>
+                    <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl text-warm-900 font-medium leading-tight mb-4">
+                        La IA en acción
+                    </h2>
+                    <p class="text-warm-700 leading-relaxed">Los prompts que necesitás para cada etapa del análisis. Hacé click en <strong class="text-warm-900">"Copiar"</strong> para llevarlos a tu herramienta de IA.</p>
+                </div>
+                <div></div>
+            </div>
+
+            <!-- Full-width banner image -->
+            <div class="observe-animate img-overlay rounded-3xl mb-20 shadow-lg" data-animation="scale">
+                <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=1400&q=80&auto=format&fit=crop"
+                     alt="Inteligencia artificial y tecnología"
+                     class="w-full h-[280px] sm:h-[340px] object-cover rounded-3xl warm-image">
+                <div class="absolute inset-0 bg-gradient-to-r from-wine-800/70 via-wine-800/40 to-transparent rounded-3xl"></div>
+                <div class="absolute inset-0 flex items-center px-8 sm:px-14">
+                    <div>
+                        <p class="text-white/70 text-sm uppercase tracking-widest mb-2">4 pasos</p>
+                        <p class="text-white font-serif text-2xl sm:text-3xl font-medium">Del mapa de sentencia<br>al esquema del recurso</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PASO 1 ===== -->
+            <div class="mb-20">
+                <div class="observe-animate flex items-center gap-4 mb-2">
+                    <span class="btn-pill px-5 py-2 bg-wine-600 text-white text-xs font-bold uppercase tracking-widest rounded-full">Paso 1</span>
+                </div>
+                <h3 class="observe-animate font-serif text-2xl sm:text-3xl text-warm-900 font-medium mb-3" style="transition-delay:0.1s">
+                    Mapa rápido de la sentencia
+                </h3>
+                <p class="observe-animate text-warm-700 mb-8 max-w-2xl" style="transition-delay:0.15s">
+                    Antes de leer la sentencia podemos orientarnos con un resumen. Este prompt produce un mapa estructurado para tener una aproximación.
+                </p>
+
+                <!-- PROMPT 1 -->
+                <div class="observe-animate" data-animation="scale" style="transition-delay:0.2s">
+                    <div class="prompt-block bg-warm-900 rounded-2xl overflow-hidden shadow-lg">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-warm-700/30">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full bg-wine-400"></span>
+                                <span class="text-wine-300 text-xs font-bold uppercase tracking-[0.12em]">Prompt 1 &mdash; Mapa de Sentencia</span>
+                            </div>
+                            <button onclick="copyPrompt(this)" class="copy-btn flex items-center gap-2 px-4 py-2 rounded-full border border-warm-600 text-warm-200 hover:text-white text-xs font-semibold uppercase tracking-wider">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Copiar
+                            </button>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <pre class="prompt-text text-sm text-warm-100 font-mono whitespace-pre-wrap leading-relaxed">Sos un asistente jurídico de apoyo.
+
+Leé esta sentencia y genera un mapa estructurado con:
+1. Tribunal, fecha e instancia
+2. Partes y objeto del litigio
+3. Distingue ratio decidendi de los obiter dictum
+5. Fundamentos principales de la decisión, identificando cada uno de ellos con título, para localizarlo señalar página y número de párrafo
+
+No agregues análisis ni opinión.
+Si algo no surge del texto con claridad, solicita instrucciones para cumplir adecuadamente la tarea.</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="observe-animate mt-6 flex items-start gap-3 max-w-2xl">
+                    <span class="w-1.5 h-1.5 rounded-full bg-wine-400 mt-2.5 flex-shrink-0"></span>
+                    <p class="text-warm-700 text-sm"><strong class="text-warm-900">Lectura:</strong> Procedemos a la lectura de la sentencia y procedemos a ampliar y corregir ese resumen.</p>
+                </div>
+            </div>
+
+            <!-- ===== PASO 2 ===== -->
+            <div class="mb-20">
+                <div class="observe-animate flex items-center gap-4 mb-2">
+                    <span class="btn-pill px-5 py-2 bg-wine-600 text-white text-xs font-bold uppercase tracking-widest rounded-full">Paso 2</span>
+                </div>
+                <h3 class="observe-animate font-serif text-2xl sm:text-3xl text-warm-900 font-medium mb-3" style="transition-delay:0.1s">
+                    Búsqueda de fuentes
+                </h3>
+                <p class="observe-animate text-warm-700 mb-8 max-w-2xl" style="transition-delay:0.15s">
+                    Ya tenemos una comprensión del contenido de la sentencia, ahora debemos buscar fuentes que puedan servirnos de respaldo.
+                </p>
+
+                <div class="observe-animate grid sm:grid-cols-2 gap-6" style="transition-delay:0.2s">
+                    <div class="bg-white rounded-2xl border border-warm-100 shadow-sm p-7">
+                        <h4 class="flex items-center gap-2 text-warm-900 font-semibold mb-5">
+                            <svg class="w-5 h-5 text-wine-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                            Conversación con la IA
+                        </h4>
+                        <ul class="space-y-3">
+                            <li class="flex items-start gap-3 text-warm-700 text-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-wine-400 mt-2 flex-shrink-0"></span>
+                                Conversación descriptiva con audio. Adjuntar resumen.
+                            </li>
+                            <li class="flex items-start gap-3 text-warm-700 text-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-wine-400 mt-2 flex-shrink-0"></span>
+                                Contar situación, necesidades, tipo de fuentes (autores reconocidos, CSJN).
+                            </li>
+                            <li class="flex items-start gap-3 text-warm-700 text-sm">
+                                <span class="w-1.5 h-1.5 rounded-full bg-wine-400 mt-2 flex-shrink-0"></span>
+                                Pedir extractos que puedan ser usados como cita.
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="flex items-start gap-3 bg-blue-50/80 border border-blue-200/60 rounded-2xl p-6 self-start">
+                        <svg class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <p class="text-warm-700 text-sm leading-relaxed">
+                            <strong class="text-warm-900">Importante:</strong> Las fuentes que suministre la IA deben ser consultadas de forma directa para verificar su contenido. Se pueden extraer pasajes relevantes en otro documento.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PASO 3 ===== -->
+            <div class="mb-20">
+                <div class="observe-animate flex items-center gap-4 mb-2">
+                    <span class="btn-pill px-5 py-2 bg-wine-600 text-white text-xs font-bold uppercase tracking-widest rounded-full">Paso 3</span>
+                </div>
+                <h3 class="observe-animate font-serif text-2xl sm:text-3xl text-warm-900 font-medium mb-3" style="transition-delay:0.1s">
+                    Detección de agravios
+                </h3>
+                <p class="observe-animate text-warm-700 mb-8 max-w-2xl" style="transition-delay:0.15s">
+                    Acá empieza el análisis crítico aumentado. Le pedimos a la IA que lea la sentencia con ojo crítico.
+                </p>
+
+                <!-- PROMPT 3 -->
+                <div class="observe-animate" data-animation="scale" style="transition-delay:0.2s">
+                    <div class="prompt-block bg-warm-900 rounded-2xl overflow-hidden shadow-lg">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-warm-700/30">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full bg-wine-400"></span>
+                                <span class="text-wine-300 text-xs font-bold uppercase tracking-[0.12em]">Prompt 3 &mdash; Detección de Agravios</span>
+                            </div>
+                            <button onclick="copyPrompt(this)" class="copy-btn flex items-center gap-2 px-4 py-2 rounded-full border border-warm-600 text-warm-200 hover:text-white text-xs font-semibold uppercase tracking-wider">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Copiar
+                            </button>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <pre class="prompt-text text-sm text-warm-100 font-mono whitespace-pre-wrap leading-relaxed">Sos un asistente de análisis jurídico. Represento al
+[actor / demandado — completar] en esta causa que tramita ante [fuero].
+
+La sentencia me fue adversa y voy a recurrir para que el [tribunal] [objetivo].
+
+Analizá la sentencia críticamente e identificá posibles
+agravios en cualquier de estas categorías:
+
+A) Errores en la valoración de la prueba
+B) Aplicación incorrecta o falta de norma aplicable
+C) Falta o defecto de fundamentación
+D) Omisión de pronunciamiento sobre alguna pretensión
+E) Violación de garantías procesales
+
+Para cada agravio que encuentres indicá:
+- En qué parte de la sentencia se verifica (página y párrafo)
+- Qué argumento invocar para fundarlo
+- Qué tan sólido te parece (fuerte / débil / depende)
+
+Al principio de tu respuesta incluir un resumen de los agravios por orden de posibilidad para lograr el objetivo de revertir la sentencia.
+
+Si no encontrás agravios genuinos en alguna categoría,
+decilo. No inventes debilidades que no existen.</pre>
+                        </div>
+                        <div class="px-6 pb-5">
+                            <span class="inline-flex items-center gap-2 text-xs text-warm-300 bg-warm-800/50 rounded-full px-4 py-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                                Recomendado: usar con modelos de pensamiento (reasoning)
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Warning -->
+                <div class="observe-animate mt-6">
+                    <div class="flex items-start gap-3 bg-red-50/80 border border-red-200/60 rounded-2xl p-5">
+                        <svg class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <p class="text-warm-700 text-sm leading-relaxed">
+                            <strong class="text-red-700">Advertencia:</strong> La IA puede detectar agravios que no existen (alucinaciones) o pasar por alto algo relevante que no está explícito en el texto. Nunca se presenta el recurso sin verificar cada punto contra el expediente real.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== PASO 4 ===== -->
+            <div>
+                <div class="observe-animate flex items-center gap-4 mb-2">
+                    <span class="btn-pill px-5 py-2 bg-wine-600 text-white text-xs font-bold uppercase tracking-widest rounded-full">Paso 4</span>
+                </div>
+                <h3 class="observe-animate font-serif text-2xl sm:text-3xl text-warm-900 font-medium mb-3" style="transition-delay:0.1s">
+                    Borrador de fundamentos
+                </h3>
+                <p class="observe-animate text-warm-700 mb-8 max-w-2xl" style="transition-delay:0.15s">
+                    Con los agravios identificados, podemos empezar con el primer borrador.
+                </p>
+
+                <!-- PROMPT 4 -->
+                <div class="observe-animate" data-animation="scale" style="transition-delay:0.2s">
+                    <div class="prompt-block bg-warm-900 rounded-2xl overflow-hidden shadow-lg">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-warm-700/30">
+                            <div class="flex items-center gap-3">
+                                <span class="w-2.5 h-2.5 rounded-full bg-wine-400"></span>
+                                <span class="text-wine-300 text-xs font-bold uppercase tracking-[0.12em]">Prompt 4 &mdash; Esquema del Recurso</span>
+                            </div>
+                            <button onclick="copyPrompt(this)" class="copy-btn flex items-center gap-2 px-4 py-2 rounded-full border border-warm-600 text-warm-200 hover:text-white text-xs font-semibold uppercase tracking-wider">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                                Copiar
+                            </button>
+                        </div>
+                        <div class="p-6 sm:p-8">
+                            <pre class="prompt-text text-sm text-warm-100 font-mono whitespace-pre-wrap leading-relaxed">Sos un asistente de redacción jurídica.
+
+Elaborá un esquema del escrito en base a estos agravios.
+El borrador debe de forma concreta:
+- Citar el pasaje de la sentencia que se impugna
+- Explicar en qué consiste el error
+- Señalar el perjuicio concreto para mi parte
+- Incluir sugerencias sobre argumentación y uso de lenguaje claro
+
+Escribí el esquema de forma concreta para que luego escriba el recurso por mi cuenta.</pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Dato Chubut -->
+                <div class="observe-animate mt-6">
+                    <div class="flex items-start gap-3 bg-warm-100/80 border border-warm-200/60 rounded-2xl p-5">
+                        <svg class="w-5 h-5 text-warm-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                        <p class="text-warm-700 text-sm leading-relaxed">
+                            <strong class="text-warm-900">Dato del caso Chubut:</strong> El juez que copió la respuesta del GPT directamente a la sentencia sin revisarla. Este enfoque evita cometer ese error.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== SECTION 4: CIERRE ========== -->
+    <section id="cierre" class="relative py-20 sm:py-28 bg-warm-50">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <!-- Section label -->
+            <div class="observe-animate flex items-center gap-3 mb-4">
+                <span class="inline-block w-12 h-[2px] bg-wine-600"></span>
+                <span class="text-wine-600 text-xs font-semibold uppercase tracking-[0.15em]">Sección 04</span>
+            </div>
+            <div class="observe-animate mb-6" style="transition-delay:0.1s">
+                <h2 class="font-serif text-3xl sm:text-4xl lg:text-5xl text-warm-900 font-medium leading-tight">
+                    Los 4 D's aplicados al recurso
+                </h2>
+            </div>
+            <div class="mb-16"></div>
+
+            <!-- 4 D Cards -->
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+                <div class="observe-animate d-card-hover bg-white rounded-2xl p-7 shadow-sm" style="transition-delay:0.1s">
+                    <div class="w-14 h-14 rounded-2xl bg-wine-50 flex items-center justify-center mb-5">
+                        <span class="font-serif text-2xl text-wine-600 font-bold">D1</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-2">Delegación</h3>
+                    <p class="text-warm-700 text-xs uppercase tracking-wider mb-3 italic">¿Qué le pido a la IA en cada paso?</p>
+                    <p class="text-warm-700 text-sm leading-relaxed">Pedirle que mapee la sentencia, no que decida qué recurrir.</p>
+                </div>
+
+                <div class="observe-animate d-card-hover bg-white rounded-2xl p-7 shadow-sm" style="transition-delay:0.2s">
+                    <div class="w-14 h-14 rounded-2xl bg-wine-50 flex items-center justify-center mb-5">
+                        <span class="font-serif text-2xl text-wine-600 font-bold">D2</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-2">Descripción</h3>
+                    <p class="text-warm-700 text-xs uppercase tracking-wider mb-3 italic">¿Cómo construyo el prompt?</p>
+                    <p class="text-warm-700 text-sm leading-relaxed">Incluir instancia, tipo de proceso y enfoque estratégico en cada instrucción.</p>
+                </div>
+
+                <div class="observe-animate d-card-hover bg-white rounded-2xl p-7 shadow-sm" style="transition-delay:0.3s">
+                    <div class="w-14 h-14 rounded-2xl bg-wine-50 flex items-center justify-center mb-5">
+                        <span class="font-serif text-2xl text-wine-600 font-bold">D3</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-2">Discernimiento</h3>
+                    <p class="text-warm-700 text-xs uppercase tracking-wider mb-3 italic">¿Qué sirve y qué descarto?</p>
+                    <p class="text-warm-700 text-sm leading-relaxed">Seleccionar agravios con criterio propio. La IA no conoce el caso como vos.</p>
+                </div>
+
+                <div class="observe-animate d-card-hover bg-white rounded-2xl p-7 shadow-sm" style="transition-delay:0.4s">
+                    <div class="w-14 h-14 rounded-2xl bg-wine-50 flex items-center justify-center mb-5">
+                        <span class="font-serif text-2xl text-wine-600 font-bold">D4</span>
+                    </div>
+                    <h3 class="font-serif text-xl text-warm-900 font-medium mb-2">Diligencia</h3>
+                    <p class="text-warm-700 text-xs uppercase tracking-wider mb-3 italic">¿Qué verifico antes de presentar?</p>
+                    <p class="text-warm-700 text-sm leading-relaxed">Corroborar citas, chequear que no haya alucinaciones, firmar con criterio propio.</p>
+                </div>
+            </div>
+
+            <!-- Final Quote with image background -->
+            <div class="observe-animate" data-animation="scale">
+                <div class="relative rounded-3xl overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1505664194779-8beaceb93744?w=1400&q=80&auto=format&fit=crop"
+                         alt="Columnas de tribunal de justicia"
+                         class="w-full h-[420px] sm:h-[480px] object-cover warm-image">
+                    <div class="absolute inset-0 bg-warm-900/80"></div>
+                    <div class="absolute inset-0 flex items-center justify-center px-6">
+                        <div class="text-center max-w-2xl">
+                            <div class="text-wine-300/40 text-7xl sm:text-8xl font-serif leading-none mb-4 select-none">&ldquo;</div>
+                            <p class="font-serif text-2xl sm:text-3xl lg:text-4xl text-white/95 leading-relaxed mb-4">
+                                La herramienta no reemplaza al jurista.
+                            </p>
+                            <p class="font-serif text-2xl sm:text-3xl lg:text-4xl text-wine-100 font-medium leading-relaxed mb-6">
+                                Lo potencia.
+                            </p>
+                            <p class="text-cream-100/85 text-base sm:text-lg leading-relaxed max-w-xl mx-auto italic">
+                                El criterio, la ética y la responsabilidad siguen siendo nuestras.
+                            </p>
+                            <div class="mt-10 w-16 h-[1px] bg-wine-400/50 mx-auto"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="bg-warm-900 py-12">
+        <div class="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-wine-600 flex items-center justify-center">
+                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/></svg>
+                    </div>
+                    <span class="text-warm-400 text-sm">Análisis Crítico de Sentencias con IA</span>
+                </div>
+                <p class="text-warm-500 text-xs">Material de clase</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ========== SCRIPTS ========== -->
+    <script>
+        // ===== INTERSECTION OBSERVER =====
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    const delay = el.style.transitionDelay || '0s';
+                    el.classList.add('observed');
+                    observer.unobserve(el);
+                }
+            });
+        }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+        document.querySelectorAll('.observe-animate').forEach(el => observer.observe(el));
+
+        // ===== COPY PROMPT =====
+        function copyPrompt(btn) {
+            const block = btn.closest('.prompt-block');
+            const text = block.querySelector('.prompt-text').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                btn.classList.add('copied');
+                const original = btn.innerHTML;
+                btn.innerHTML = `<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg> Copiado`;
+                setTimeout(() => { btn.classList.remove('copied'); btn.innerHTML = original; }, 2000);
+            });
+        }
+
+        // ===== PROGRESS BAR =====
+        window.addEventListener('scroll', () => {
+            const p = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
+            document.getElementById('progressBar').style.width = p + '%';
+        });
+
+        // ===== ACTIVE NAV =====
+        const sections = document.querySelectorAll('section[id]');
+        const navLinks = document.querySelectorAll('.nav-link-underline');
+        window.addEventListener('scroll', () => {
+            let current = '';
+            sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+            navLinks.forEach(l => {
+                l.classList.remove('active', 'text-wine-600');
+                l.classList.add('text-warm-700');
+                if (l.getAttribute('href') === '#' + current) {
+                    l.classList.add('active', 'text-wine-600');
+                    l.classList.remove('text-warm-700');
+                }
+            });
+        });
+
+        // ===== NAVBAR SHADOW ON SCROLL =====
+        const nav = document.getElementById('mainNav');
+        window.addEventListener('scroll', () => {
+            nav.classList.toggle('shadow-md', window.scrollY > 20);
+        });
+
+        // ===== MOBILE MENU =====
+        document.getElementById('mobileMenuBtn').addEventListener('click', () => {
+            document.getElementById('mobileMenu').classList.toggle('hidden');
+        });
+        document.querySelectorAll('.mobile-nav').forEach(l => {
+            l.addEventListener('click', () => document.getElementById('mobileMenu').classList.add('hidden'));
+        });
+
+        // ===== HERO PARALLAX =====
+        window.addEventListener('scroll', () => {
+            const hero = document.querySelector('.hero-image');
+            if (hero) hero.style.transform = `translateY(${window.scrollY * 0.3}px)`;
+        });
+    </script>
+</body>
+</html>
